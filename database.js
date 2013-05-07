@@ -441,10 +441,15 @@ Database.prototype.temporaryView = function(
  *     called, after getting response from the view, or if there was an error
  */
 Database.prototype.view = function(design, view, paramsOrCallback, callback) {
-  var params = (typeof(paramsOrCallback) === 'object') ?
-               '?' + querystring.stringify(paramsOrCallback, '&', '=') :
-               '',
-      path = this.name() + '/_design/' + design + '/_view/' + view;
+  var params = '';
+  if(typeof paramsOrCallback === 'object') {
+    paramsOrCallback = JSON.parse(JSON.stringify(paramsOrCallback));
+    for(var key in paramsOrCallback) {
+      var paramsOrCallback[key] = JSON.stringify(paramsOrCallback[key]);
+    }
+    params = '?' + querystring.stringify(paramsOrCallback, '&', '=');
+  }
+  path = this.name() + '/_design/' + design + '/_view/' + view;
   callback = callback || paramsOrCallback;
 
   this._connection.request({
